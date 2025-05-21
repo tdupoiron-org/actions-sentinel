@@ -1,0 +1,24 @@
+{
+  "name": "actions-sentinel",
+  "version": "1.0.0",
+  "description": "A security-focused tool for evaluating and managing GitHub Actions in a controlled, automated workflow using IssueOps and GitOps principles.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tdupoiron-org/actions-sentinel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tdupoiron-org/actions-sentinel/issues"
+  },
+  "homepage": "https://github.com/tdupoiron-org/actions-sentinel#readme",
+  "dependencies": {
+    "@octokit/rest": "^21.1.1",
+    "dotenv": "^16.5.0"
+  }
+}
