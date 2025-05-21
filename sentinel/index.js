@@ -1,5 +1,6 @@
 const { Octokit } = require('@octokit/rest');
 const dotenv = require('dotenv');
+const core = require('@actions/core');
 
 // Load environment variables
 dotenv.config();
@@ -108,18 +109,39 @@ module.exports = {
     addActionToWhitelist
 };
 
-// If running directly from command line
-if (require.main === module) {
-    const actionRef = process.argv[2];
-    if (!actionRef) {
-        console.error('Please provide an action reference as an argument');
-        process.exit(1);
-    }
+// Main function that handles both CLI and GitHub Actions contexts
+async function run() {
+    try {
+        let actionRef;
+        
+        // Check if running in GitHub Actions context
+        if (process.env.GITHUB_ACTIONS === 'true') {
+            actionRef = core.getInput('action-name', { required: true });
+        } else {
+            // Running from command line
+            actionRef = process.argv[2];
+            if (!actionRef) {
+                console.error('Please provide an action reference as an argument');
+                process.exit(1);
+            }
+        }
 
-    addActionToWhitelist(actionRef)
-        .then(() => process.exit(0))
-        .catch((error) => {
+        await addActionToWhitelist(actionRef);
+        
+        if (process.env.GITHUB_ACTIONS === 'true') {
+            core.setOutput('result', 'success');
+        }
+    } catch (error) {
+        if (process.env.GITHUB_ACTIONS === 'true') {
+            core.setFailed(error.message);
+        } else {
             console.error(error);
             process.exit(1);
-        });
+        }
+    }
+}
+
+// Run if called directly
+if (require.main === module) {
+    run();
 }
