@@ -13,6 +13,17 @@ This repository provides a secure way to manage which GitHub Actions are allowed
 - **GitOps Implementation**: Maintains whitelist through version-controlled configuration
 - **Standardized Request Process**: Structured issue templates for action whitelisting requests
 
+## Workflows
+
+### Action Whitelist Request Handler
+
+Located in `.github/workflows/whitelist-request.yml`, this workflow automatically processes GitHub Action whitelist requests:
+
+- Triggers on issue creation and editing
+- Only processes issues with the label `actions-whitelist-request`
+- Extracts the requested action reference from the issue description
+- Logs the action reference for further processing
+
 ## How It Works
 
 1. **Request Process**:

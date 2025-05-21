@@ -1,0 +1,29 @@
+name: Actions Whitelist Request Handler
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  process-whitelist-request:
+    runs-on: ubuntu-latest
+    # Only run if the issue has the required label
+    if: contains(github.event.issue.labels.*.name, 'actions-whitelist-request')
+    
+    steps:
+      - name: Extract Action Reference
+        id: extract
+        run: |
+          # Get issue body and extract action reference between "### Action Reference" and the next section
+          ISSUE_BODY="${{ github.event.issue.body }}"
+          ACTION_REF=$(echo "$ISSUE_BODY" | awk '/### Action Reference/{flag=1;next}/###/{flag=0}flag')
+          
+          # Clean up the extracted reference (remove whitespace and empty lines)
+          ACTION_REF=$(echo "$ACTION_REF" | sed '/^[[:space:]]*$/d' | xargs)
+          
+          echo "Extracted Action Reference: $ACTION_REF"
+          echo "action_ref=$ACTION_REF" >> $GITHUB_OUTPUT
+
+      - name: Log Action Reference
+        run: |
+          echo "Processing whitelist request for action: ${{ steps.extract.outputs.action_ref }}"
