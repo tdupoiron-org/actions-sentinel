@@ -33,6 +33,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            console.log('Full context:', JSON.stringify(context, null, 2))
             const actionRef = '${{ steps.extract.outputs.action_ref }}'
             console.log('Updating issue title for:', {
               owner: context.repo.owner,
