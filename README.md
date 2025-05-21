@@ -1,5 +1,7 @@
 # actions-sentinel
 
+[![Build](https://github.com/tdupoiron-org/actions-sentinel/actions/workflows/build.yml/badge.svg)](https://github.com/tdupoiron-org/actions-sentinel/actions/workflows/build.yml)
+
 A security-focused tool for evaluating and managing GitHub Actions in a controlled, automated workflow using IssueOps and GitOps principles.
 
 ## Overview
