@@ -22,6 +22,7 @@ Located in `.github/workflows/whitelist-request.yml`, this workflow automaticall
 - Triggers on issue creation and editing
 - Only processes issues with the label `actions-whitelist-request`
 - Extracts the requested action reference from the issue description
+- Updates the issue title to include the action reference
 - Logs the action reference for further processing
 
 ## How It Works

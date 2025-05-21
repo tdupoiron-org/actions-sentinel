@@ -27,3 +27,15 @@ jobs:
       - name: Log Action Reference
         run: |
           echo "Processing whitelist request for action: ${{ steps.extract.outputs.action_ref }}"
+          
+      - name: Update Issue Title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const actionRef = '${{ steps.extract.outputs.action_ref }}'
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              issue_number: context.issue.number,
+              title: `[Action Whitelist Request] ${actionRef}`
+            })
