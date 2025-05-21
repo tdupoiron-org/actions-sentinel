@@ -13,6 +13,8 @@ This repository provides a secure way to manage which GitHub Actions are allowed
 - **GitOps Implementation**: Maintains whitelist through version-controlled configuration
 - **Standardized Request Process**: Structured issue templates for action whitelisting requests
 - **CLI Interface**: Programmatic interface to manage action whitelisting
+- **Smart Notifications**: Rich, context-aware status updates with dynamic feedback based on evaluation results
+- **Robust Error Handling**: Comprehensive error handling and status reporting throughout the process
 
 ## Usage
 
@@ -51,6 +53,47 @@ The action requires a GitHub token with `admin:org` permissions to manage organi
     action-name: 'owner/repo@version'
     organization: ${{ github.repository_owner }}
     github-token: ${{ secrets.YOUR_PAT_WITH_ADMIN_ORG }}  # Token with admin:org permissions
+```
+
+### Action Inputs and Outputs
+
+#### Inputs
+- `action-name`: Name of the action to evaluate (required)
+- `organization`: GitHub organization name (required)
+- `github-token`: GitHub token with admin:org permissions (required)
+
+#### Outputs
+- `status`: Status of the evaluation (success/failure)
+- `result`: Detailed JSON object containing evaluation results
+- `details`: Additional details about the evaluation process
+
+Example workflow using outputs:
+```yaml
+- name: Evaluate Action
+  id: evaluate
+  uses: ./sentinel
+  with:
+    action-name: 'owner/repo@version'
+    organization: ${{ github.repository_owner }}
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+
+- name: Use Evaluation Results
+  if: always()
+  uses: actions/github-script@v7
+  with:
+    script: |
+      const status = '${{ steps.evaluate.outputs.status }}';
+      const details = '${{ steps.evaluate.outputs.details }}';
+      let result;
+      try {
+        result = JSON.parse('${{ steps.evaluate.outputs.result }}');
+      } catch (e) {
+        result = { error: 'Could not parse results' };
+      }
+      
+      console.log('Status:', status);
+      console.log('Details:', details);
+      console.log('Result:', JSON.stringify(result, null, 2));
 ```
 
 ### Web Interface

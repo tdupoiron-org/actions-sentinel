@@ -47,8 +47,11 @@ async function getCurrentAllowedPatterns(octokit, organization) {
 }
 
 async function addActionToWhitelist(actionRef, organization, token) {
+    let details = [];
     try {
+        details.push('Validating action reference...');
         const { owner, repo, version } = await validateActionReference(actionRef);
+        details.push('Action reference validated successfully');
 
         // Initialize Octokit with provided token
         const octokit = new Octokit({
@@ -145,13 +148,26 @@ async function run() {
             }
         }
 
-        await addActionToWhitelist(actionRef, organization, token);
+        const result = await addActionToWhitelist(actionRef, organization, token);
         
         if (process.env.GITHUB_ACTIONS === 'true') {
-            core.setOutput('result', 'success');
+            core.setOutput('status', 'success');
+            core.setOutput('result', JSON.stringify({
+                actionName: actionRef,
+                organization,
+                whitelistStatus: result ? 'added' : 'already_exists',
+                timestamp: new Date().toISOString()
+            }));
+            core.setOutput('details', `Action ${actionRef} has been processed successfully for the whitelist`);
         }
     } catch (error) {
         if (process.env.GITHUB_ACTIONS === 'true') {
+            core.setOutput('status', 'failure');
+            core.setOutput('result', JSON.stringify({
+                error: error.message,
+                timestamp: new Date().toISOString()
+            }));
+            core.setOutput('details', error.stack || error.message);
             core.setFailed(error.message);
         } else {
             console.error(error);

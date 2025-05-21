@@ -14,6 +14,14 @@ inputs:
     required: true
     default: ${{ github.token }}
 
+outputs:
+  result:
+    description: 'Detailed results of the action evaluation'
+  status:
+    description: 'Status of the evaluation (success/failure)'
+  details:
+    description: 'Additional details about the evaluation process'
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
