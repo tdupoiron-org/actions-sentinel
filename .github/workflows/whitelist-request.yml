@@ -36,13 +36,13 @@ jobs:
             console.log('Full context:', JSON.stringify(context, null, 2))
             const actionRef = '${{ steps.extract.outputs.action_ref }}'
             console.log('Updating issue title for:', {
-              owner: context.repo.owner,
-              repo: context.repo.name,
+              owner: context.repository.owner.login,
+              repo: context.repository.name,
               issue_number: context.issue.number
             })
             await github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.name,
+              owner: context.repository.owner.login,
+              repo: context.repository.name,
               issue_number: context.issue.number,
               title: `[Action Whitelist Request] ${actionRef}`
             })
