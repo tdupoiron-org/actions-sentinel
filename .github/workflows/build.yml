@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+    paths:
+      - 'sentinel/**'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: sentinel/package-lock.json
+      
+      - name: Install dependencies
+        run: cd sentinel && npm ci
+      
+      - name: Build
+        run: cd sentinel && npm run build
+      
+      - name: Commit dist
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add sentinel/dist
+          git commit -m "chore: update dist" || echo "No changes to commit"
+          git push

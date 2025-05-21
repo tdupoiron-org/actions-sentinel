@@ -1,0 +1,12 @@
+name: 'Actions Sentinel'
+description: 'A security-focused tool for evaluating and managing GitHub Actions'
+author: 'tdupoiron'
+
+inputs:
+  action-name:
+    description: 'Name of the action to evaluate'
+    required: true
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
