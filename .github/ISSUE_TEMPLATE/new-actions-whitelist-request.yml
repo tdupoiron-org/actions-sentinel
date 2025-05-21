@@ -1,0 +1,58 @@
+name: GitHub Actions Whitelist Request
+description: Request to add a GitHub Action to the whitelist
+title: "[Action Whitelist Request]: "
+labels: ["actions-whitelist-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this whitelist request!
+        Please provide all the necessary information to help us evaluate the GitHub Action.
+
+  - type: input
+    id: action_url
+    attributes:
+      label: Action URL
+      description: |
+        Provide the link to either:
+        - GitHub Marketplace listing (e.g., https://github.com/marketplace/actions/build-and-push-docker-images)
+        - GitHub Repository (e.g., https://github.com/docker/build-push-action)
+      placeholder: https://github.com/...
+    validations:
+      required: true
+
+  - type: input
+    id: version_ref
+    attributes:
+      label: Version Reference
+      description: |
+        Provide either:
+        - The tag version (e.g., v1.0.0)
+        - The full commit SHA (e.g., 8e4aa4a9c6c4d3237cf3eef2c8c35dee518c3239)
+      placeholder: Enter tag or commit SHA
+    validations:
+      required: true
+
+  - type: textarea
+    id: justification
+    attributes:
+      label: Justification
+      description: Why do you need this action to be whitelisted?
+      placeholder: |
+        Please explain:
+        - What this action does
+        - Why it's necessary for your workflow
+        - Any security considerations you've reviewed
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Security Acknowledgement
+      description: Please confirm you have reviewed the security implications
+      options:
+        - label: I have reviewed the action's source code and verified it performs only necessary operations
+          required: true
+        - label: I understand that this action will be evaluated for security before being whitelisted
+          required: true
