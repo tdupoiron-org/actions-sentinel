@@ -2,48 +2,64 @@ name: Actions Whitelist Request Handler
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, reopened]
 
 jobs:
   process-whitelist-request:
     runs-on: ubuntu-latest
-    # Only run if the issue has the required label
     if: contains(github.event.issue.labels.*.name, 'actions-whitelist-request')
     
     steps:
       - name: Extract Action Reference
         id: extract
-        run: |
-          # Get issue body and extract action reference between "### Action Reference" and the next section
-          ISSUE_BODY="${{ github.event.issue.body }}"
-          ACTION_REF=$(echo "$ISSUE_BODY" | awk '/### Action Reference/{flag=1;next}/###/{flag=0}flag')
-          
-          # Clean up the extracted reference (remove whitespace and empty lines)
-          ACTION_REF=$(echo "$ACTION_REF" | sed '/^[[:space:]]*$/d' | xargs)
-          
-          echo "Extracted Action Reference: $ACTION_REF"
-          echo "action_ref=$ACTION_REF" >> $GITHUB_OUTPUT
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueBody = context.payload.issue.body;
+            if (!issueBody) {
+              throw new Error('Issue body is empty');
+            }
+            
+            // Extract action reference between "### Action Reference" and the next section
+            const actionRefMatch = issueBody.match(/### Action Reference\s*([^#]*)/);
+            if (!actionRefMatch || !actionRefMatch[1].trim()) {
+              throw new Error('Action Reference section not found or empty');
+            }
+            
+            const actionRef = actionRefMatch[1].trim();
+            console.log('Extracted Action Reference:', actionRef);
+            return actionRef;
+          result-encoding: string
 
       - name: Log Action Reference
+        env:
+          ACTION_REF: ${{ steps.extract.outputs.result }}
         run: |
-          echo "Processing whitelist request for action: ${{ steps.extract.outputs.action_ref }}"
+          echo "Processing whitelist request for action: ${{ env.ACTION_REF }}"
           
       - name: Update Issue Title
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            console.log('Full context:', JSON.stringify(context, null, 2))
-            const actionRef = '${{ steps.extract.outputs.action_ref }}'
-            console.log('Updating issue title for:', {
-              owner: context.repository.owner.login,
-              repo: context.repository.name,
-              issue_number: context.issue.number
-            })
-            await github.rest.issues.update({
-              owner: context.repository.owner.login,
-              repo: context.repository.name,
-              issue_number: context.issue.number,
-              title: `[Action Whitelist Request] ${actionRef}`
-            })
-            console.log('Issue title updated successfully')
+            try {
+              const actionRef = '${{ steps.extract.outputs.result }}'
+              console.log('Updating issue title for:', {
+                owner: context.repo.owner,
+                repo: context.repo.name,
+                issue_number: context.issue.number,
+                actionRef: actionRef
+              })
+              
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.name,
+                issue_number: context.issue.number,
+                title: `[Action Whitelist Request] ${actionRef}`
+              })
+              
+              console.log('Issue title updated successfully')
+            } catch (error) {
+              console.error('Failed to update issue title:', error)
+              throw error
+            }
