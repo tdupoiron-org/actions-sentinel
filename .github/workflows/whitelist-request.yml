@@ -52,24 +52,35 @@ jobs:
           script: |
             try {
               const actionRef = '${{ steps.extract.outputs.result }}'
-              console.log('Updating issue title for:', {
+              if (!actionRef) {
+                throw new Error('Action reference is empty or undefined')
+              }
+
+              console.log('Current issue details:', {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
                 actionRef: actionRef
               })
               
-              await github.rest.issues.update({
+              const newTitle = `[Action Whitelist Request] ${actionRef}`
+              console.log('Attempting to update issue title to:', newTitle)
+              
+              const result = await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                title: `[Action Whitelist Request] ${actionRef}`
+                title: newTitle
               })
 
-              console.log('Issue title updated successfully')
+              if (result.status !== 200) {
+                throw new Error(`Failed to update issue title. Status: ${result.status}`)
+              }
+
+              console.log('Issue title updated successfully:', newTitle)
             } catch (error) {
-              console.error('Failed to update issue title:', error)
-              throw error
+              console.error('Failed to update issue title:', error.message)
+              core.setFailed(`Failed to update issue title: ${error.message}`)
             }
 
       - name: Evaluate Action
