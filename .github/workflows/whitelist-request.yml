@@ -44,27 +44,7 @@ jobs:
           ACTION_REF: ${{ steps.extract.outputs.result }}
         run: |
           echo "Processing whitelist request for action: ${{ env.ACTION_REF }}"
-
-      - name: Evaluate Action
-        id: evaluate
-        uses: ./sentinel
-        with:
-          action-name: ${{ steps.extract.outputs.result }}
-          organization: ${{ github.repository_owner }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Add Evaluation Results
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: comments } = await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: '## Security Evaluation Results\nAction evaluation completed. Check the workflow logs for details.'
-            });
-
+          
       - name: Update Issue Title
         uses: actions/github-script@v7
         with:
@@ -85,9 +65,29 @@ jobs:
                 issue_number: context.issue.number,
                 title: `[Action Whitelist Request] ${actionRef}`
               })
-              
+
               console.log('Issue title updated successfully')
             } catch (error) {
               console.error('Failed to update issue title:', error)
               throw error
             }
+
+      - name: Evaluate Action
+        id: evaluate
+        uses: ./sentinel
+        with:
+          action-name: ${{ steps.extract.outputs.result }}
+          organization: ${{ github.repository_owner }}
+          github-token: ${{ secrets.ACTION_WHITELIST_TOKEN }}
+
+      - name: Add Evaluation Results
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '## Security Evaluation Results\nAction evaluation completed. Check the workflow logs for details.'
+            });
