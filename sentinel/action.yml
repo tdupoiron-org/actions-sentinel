@@ -6,6 +6,13 @@ inputs:
   action-name:
     description: 'Name of the action to evaluate'
     required: true
+  organization:
+    description: 'GitHub organization name'
+    required: true
+  github-token:
+    description: 'GitHub token with admin:org permissions'
+    required: true
+    default: ${{ github.token }}
 
 runs:
   using: 'node16'

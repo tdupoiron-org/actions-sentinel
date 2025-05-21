@@ -46,19 +46,21 @@ async function getCurrentAllowedPatterns(octokit, organization) {
     }
 }
 
-async function addActionToWhitelist(actionRef) {
+async function addActionToWhitelist(actionRef, organization, token) {
     try {
         const { owner, repo, version } = await validateActionReference(actionRef);
 
-        // Initialize Octokit with PAT from environment variable
+        // Initialize Octokit with provided token
         const octokit = new Octokit({
-            auth: process.env.GITHUB_TOKEN
+            auth: token
         });
 
-        // Get the organization settings for allowed actions
-        const organization = process.env.GITHUB_ORGANIZATION;
         if (!organization) {
-            throw new Error('GITHUB_ORGANIZATION environment variable is not set');
+            throw new Error('GitHub organization name is required');
+        }
+
+        if (!token) {
+            throw new Error('GitHub token is required');
         }
 
         // First, check the current organization settings
@@ -113,20 +115,37 @@ module.exports = {
 async function run() {
     try {
         let actionRef;
+        let organization;
+        let token;
         
         // Check if running in GitHub Actions context
         if (process.env.GITHUB_ACTIONS === 'true') {
             actionRef = core.getInput('action-name', { required: true });
+            organization = core.getInput('organization', { required: true });
+            token = core.getInput('github-token', { required: true });
         } else {
             // Running from command line
             actionRef = process.argv[2];
+            organization = process.env.GITHUB_ORGANIZATION;
+            token = process.env.GITHUB_TOKEN;
+            
             if (!actionRef) {
                 console.error('Please provide an action reference as an argument');
                 process.exit(1);
             }
+            
+            if (!organization) {
+                console.error('GITHUB_ORGANIZATION environment variable is not set');
+                process.exit(1);
+            }
+
+            if (!token) {
+                console.error('GITHUB_TOKEN environment variable is not set');
+                process.exit(1);
+            }
         }
 
-        await addActionToWhitelist(actionRef);
+        await addActionToWhitelist(actionRef, organization, token);
         
         if (process.env.GITHUB_ACTIONS === 'true') {
             core.setOutput('result', 'success');

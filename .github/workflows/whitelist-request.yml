@@ -4,6 +4,11 @@ on:
   issues:
     types: [opened, edited, reopened]
 
+permissions:
+  issues: write     # Needed for commenting and updating issues
+  actions: write    # Needed for managing GitHub Actions settings
+  contents: read    # Needed for checking out code
+
 jobs:
   process-whitelist-request:
     runs-on: ubuntu-latest
@@ -45,7 +50,9 @@ jobs:
         uses: ./sentinel
         with:
           action-name: ${{ steps.extract.outputs.result }}
-          
+          organization: ${{ github.repository_owner }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Add Evaluation Results
         uses: actions/github-script@v7
         with:

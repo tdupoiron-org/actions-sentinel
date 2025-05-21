@@ -25,6 +25,32 @@ You can use this action in your workflows to evaluate GitHub Actions:
   uses: ./sentinel
   with:
     action-name: 'owner/repo@version'
+    organization: 'your-org-name'
+    github-token: ${{ secrets.GITHUB_TOKEN }}  # Token needs admin:org permissions
+```
+
+> **Note**: The GitHub token provided must have `admin:org` permissions to manage organization settings. The default `GITHUB_TOKEN` may not have sufficient permissions - you might need to use a Personal Access Token (PAT) with the required permissions.
+
+### Workflow Permissions
+
+When using this action in a GitHub Actions workflow, make sure to set the following permissions:
+
+```yaml
+permissions:
+  issues: write     # If you need to update issues
+  actions: write    # Required for managing GitHub Actions settings
+  contents: read    # Required for checking out code
+```
+
+The action requires a GitHub token with `admin:org` permissions to manage organization settings. If the default `GITHUB_TOKEN` doesn't have sufficient permissions, you'll need to create and use a Personal Access Token (PAT) with the required permissions:
+
+```yaml
+- name: Evaluate Action
+  uses: ./sentinel
+  with:
+    action-name: 'owner/repo@version'
+    organization: ${{ github.repository_owner }}
+    github-token: ${{ secrets.YOUR_PAT_WITH_ADMIN_ORG }}  # Token with admin:org permissions
 ```
 
 ### Web Interface
