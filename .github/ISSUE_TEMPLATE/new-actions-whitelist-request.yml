@@ -10,26 +10,13 @@ body:
         Please provide all the necessary information to help us evaluate the GitHub Action.
 
   - type: input
-    id: action_url
+    id: action_ref
     attributes:
-      label: Action URL
+      label: Action Reference
       description: |
-        Provide the link to either:
-        - GitHub Marketplace listing (e.g., https://github.com/marketplace/actions/build-and-push-docker-images)
-        - GitHub Repository (e.g., https://github.com/docker/build-push-action)
-      placeholder: https://github.com/...
-    validations:
-      required: true
-
-  - type: input
-    id: version_ref
-    attributes:
-      label: Version Reference
-      description: |
-        Provide either:
-        - The tag version (e.g., v1.0.0)
-        - The full commit SHA (e.g., 8e4aa4a9c6c4d3237cf3eef2c8c35dee518c3239)
-      placeholder: Enter tag or commit SHA
+        Provide the action reference in the format: owner/action@version
+        Example: docker/build-push-action@v6.17.0
+      placeholder: owner/action@version
     validations:
       required: true
 
