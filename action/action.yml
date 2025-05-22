@@ -3,8 +3,8 @@ description: 'A security-focused tool for evaluating and managing GitHub Actions
 author: 'tdupoiron'
 
 inputs:
-  action-name:
-    description: 'Name of the action to evaluate'
+  actions:
+    description: 'Comma-separated list of actions to evaluate (e.g., "actions/checkout@v3,actions/setup-node@v3")'
     required: true
   organization:
     description: 'GitHub organization name'
@@ -16,7 +16,7 @@ inputs:
 
 outputs:
   result:
-    description: 'Detailed results of the action evaluation'
+    description: 'Detailed results of the actions evaluation'
   status:
     description: 'Status of the evaluation (success/failure)'
   details:

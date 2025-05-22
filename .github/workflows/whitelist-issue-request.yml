@@ -58,6 +58,16 @@ jobs:
             }
             
             const actionRef = actionRefMatch[1].trim();
+            if (!actionRef) {
+              throw new Error('No valid action reference found');
+            }
+            
+            // Basic validation of the action reference format
+            const actionPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+@[a-zA-Z0-9._-]+$/;
+            if (!actionPattern.test(actionRef)) {
+              throw new Error('Invalid action reference format. Expected: owner/repo@ref');
+            }
+            
             console.log('Extracted Action Reference:', actionRef);
             return actionRef;
           result-encoding: string

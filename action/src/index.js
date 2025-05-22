@@ -42,137 +42,96 @@ async function getCurrentAllowedPatterns(octokit, organization) {
     }
 }
 
-async function addActionToWhitelist(actionRef, organization, token) {
-    let details = [];
+async function addActionToWhitelist(actionRef, organization, token, currentSettings) {
+    const { owner, repo, version } = await validateActionReference(actionRef);
+    const newPattern = `${owner}/${repo}@${version}`;
+
+    // Check if the pattern is already in the whitelist
+    if (currentSettings.patterns.includes(newPattern)) {
+        console.log(`Action ${actionRef} is already in the whitelist.`);
+        return currentSettings;
+    }
+
+    // Add the new pattern to the list
+    return {
+        ...currentSettings,
+        patterns: [...currentSettings.patterns, newPattern]
+    };
+}
+
+async function run() {
     try {
-        details.push('Validating action reference...');
-        const { owner, repo, version } = await validateActionReference(actionRef);
-        details.push('Action reference validated successfully');
+        // Get inputs
+        const actionsInput = core.getInput('actions', { required: true });
+        const organization = core.getInput('organization', { required: true });
+        const token = core.getInput('github-token', { required: true });
+
+        let details = [];
+        let status = 'success';
+        const actionList = actionsInput.split(',').map(a => a.trim());
 
         // Initialize Octokit with provided token
         const octokit = new Octokit({
             auth: token
         });
 
-        if (!organization) {
-            throw new Error('GitHub organization name is required');
-        }
-
-        if (!token) {
-            throw new Error('GitHub token is required');
-        }
-
         // First, check the current organization settings
+        details.push('Checking organization settings...');
         const settings = await getOrganizationActionsSettings(octokit, organization);
         
         // If all actions are already allowed, no need to add to whitelist
         if (settings.enabled_repositories === "all" && settings.allowed_actions === "all") {
             console.log('All actions are already allowed in this organization. No need to add to whitelist.');
-            return true;
+            core.setOutput('result', { status: 'success', message: 'All actions are already allowed' });
+            core.setOutput('status', 'success');
+            core.setOutput('details', details);
+            return;
         }
 
         // Get current allowed patterns and settings
-        const currentSettings = await getCurrentAllowedPatterns(octokit, organization);
-        const newPattern = `${owner}/${repo}@${version}`;
+        let currentSettings = await getCurrentAllowedPatterns(octokit, organization);
 
-        // Check if the pattern is already in the whitelist
-        if (currentSettings.patterns.includes(newPattern)) {
-            console.log(`Action ${actionRef} is already in the whitelist.`);
-            return true;
+        // Process each action
+        for (const actionRef of actionList) {
+            try {
+                details.push(`Validating action: ${actionRef}...`);
+                currentSettings = await addActionToWhitelist(actionRef, organization, token, currentSettings);
+                details.push(`Successfully validated action: ${actionRef}`);
+            } catch (error) {
+                console.error(`Error processing action ${actionRef}:`, error.message);
+                details.push(`Error processing action ${actionRef}: ${error.message}`);
+                status = 'failure';
+            }
         }
 
-        // Update organization settings to allow the specific action while preserving existing patterns
+        // Update organization settings with all new patterns
         try {
             await octokit.request('PUT /orgs/{org}/actions/permissions/selected-actions', {
                 org: organization,
                 github_owned_allowed: currentSettings.github_owned_allowed,
                 verified_allowed: currentSettings.verified_allowed,
-                patterns_allowed: [...currentSettings.patterns, newPattern]
+                patterns_allowed: currentSettings.patterns
             });
-            console.log(`Successfully added ${actionRef} to organization whitelist`);
+            details.push('Successfully updated organization whitelist');
         } catch (error) {
             if (error.status === 409) {
-                console.log('All actions are already allowed in this organization. No need to add to whitelist.');
-                return true;
+                console.log('All actions are already allowed in this organization.');
+                details.push('All actions are already allowed in this organization');
+            } else {
+                throw error;
             }
-            throw error;
         }
 
-        return true;
+        // Set outputs
+        core.setOutput('result', { status, patterns: currentSettings.patterns });
+        core.setOutput('status', status);
+        core.setOutput('details', details);
+
     } catch (error) {
-        console.error('Error adding action to whitelist:', error.message);
+        console.error(error);
+        core.setFailed(error.message);
         throw error;
     }
 }
 
-// Export for use in other modules
-module.exports = {
-    addActionToWhitelist
-};
-
-// Main function that handles both CLI and GitHub Actions contexts
-async function run() {
-    try {
-        let actionRef;
-        let organization;
-        let token;
-        
-        // Check if running in GitHub Actions context
-        if (process.env.GITHUB_ACTIONS === 'true') {
-            actionRef = core.getInput('action-name', { required: true });
-            organization = core.getInput('organization', { required: true });
-            token = core.getInput('github-token', { required: true });
-        } else {
-            // Running from command line
-            actionRef = process.argv[2];
-            organization = process.env.GITHUB_ORGANIZATION;
-            token = process.env.GITHUB_TOKEN;
-            
-            if (!actionRef) {
-                console.error('Please provide an action reference as an argument');
-                process.exit(1);
-            }
-            
-            if (!organization) {
-                console.error('GITHUB_ORGANIZATION environment variable is not set');
-                process.exit(1);
-            }
-
-            if (!token) {
-                console.error('GITHUB_TOKEN environment variable is not set');
-                process.exit(1);
-            }
-        }
-
-        const result = await addActionToWhitelist(actionRef, organization, token);
-        
-        if (process.env.GITHUB_ACTIONS === 'true') {
-            core.setOutput('status', 'success');
-            core.setOutput('result', JSON.stringify({
-                actionName: actionRef,
-                organization,
-                whitelistStatus: result ? 'added' : 'already_exists',
-                timestamp: new Date().toISOString()
-            }));
-            core.setOutput('details', `Action ${actionRef} has been processed successfully for the whitelist`);
-        }
-    } catch (error) {
-        if (process.env.GITHUB_ACTIONS === 'true') {
-            core.setOutput('status', 'failure');
-            core.setOutput('result', JSON.stringify({
-                error: error.message,
-                timestamp: new Date().toISOString()
-            }));
-            core.setOutput('details', error.stack || error.message);
-            core.setFailed(error.message);
-        } else {
-            console.error(error);
-            process.exit(1);
-        }
-    }
-}
-
-// Run if called directly
-if (require.main === module) {
-    run();
-}
+run();
