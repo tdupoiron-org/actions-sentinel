@@ -1,3 +1,3 @@
 allowedActions:
   - name: actions/checkout@v5
-- name: actions/checkou
+  - name: actions/check
