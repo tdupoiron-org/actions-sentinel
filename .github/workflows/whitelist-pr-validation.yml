@@ -52,12 +52,31 @@ jobs:
                 ref: context.payload.pull_request.head.sha
               });
               
-              const baseContent = yaml.parse(Buffer.from(baseFile.data.content, 'base64').toString());
-              const prContent = yaml.parse(Buffer.from(prFile.data.content, 'base64').toString());
-              
-              if (!baseContent.allowedActions || !prContent.allowedActions) {
-                throw new Error('Invalid actions.yml format: allowedActions is required');
-              }
+              // Parse and normalize the YAML content
+              const parseAndNormalizeContent = (content) => {
+                try {
+                  const parsedContent = yaml.parse(content);
+                  
+                  // Ensure allowedActions is an array
+                  if (!parsedContent || !Array.isArray(parsedContent.allowedActions)) {
+                    throw new Error('allowedActions must be an array');
+                  }
+                  
+                  // Validate each action entry
+                  parsedContent.allowedActions.forEach((action, index) => {
+                    if (!action.name) {
+                      throw new Error(`Action at index ${index} is missing required 'name' field`);
+                    }
+                  });
+                  
+                  return parsedContent;
+                } catch (parseError) {
+                  throw new Error(`YAML parsing error: ${parseError.message}`);
+                }
+              };
+
+              const baseContent = parseAndNormalizeContent(Buffer.from(baseFile.data.content, 'base64').toString());
+              const prContent = parseAndNormalizeContent(Buffer.from(prFile.data.content, 'base64').toString());
 
               // Find new or modified actions
               const baseActions = new Set(baseContent.allowedActions.map(a => a.name));

@@ -37,6 +37,20 @@ Submit a pull request that modifies `actions-whitelist.yml`:
 
 Both methods ensure proper security review and maintain a clear audit trail of approved actions.
 
+### actions.yml Structure
+
+The `whitelist/actions.yml` file must follow this structure:
+
+```yaml
+allowedActions:
+  - name: owner/repo@version     # Required: Full action reference
+    added: "YYYY-MM-DD"         # Required: Date added in ISO format
+    approvedBy: "username"      # Required: Who approved the action
+    securityReview: "status"    # Required: "completed" or "pending"
+```
+
+Each action entry must be properly indented under the `allowedActions` array and include all required fields. Invalid YAML structure or missing fields will cause validation errors.
+
 ## Features
 
 - **IssueOps-based Workflow**: Uses GitHub Issues for requesting action whitelisting
