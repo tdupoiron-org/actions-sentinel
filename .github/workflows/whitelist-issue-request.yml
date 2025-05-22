@@ -120,7 +120,7 @@ jobs:
         id: evaluate
         uses: ./action
         with:
-          action-name: ${{ steps.extract.outputs.result }}
+          actions: ${{ steps.extract.outputs.result }}
           organization: ${{ github.repository_owner }}
           github-token: ${{ steps.generate-token.outputs.token }}
 
