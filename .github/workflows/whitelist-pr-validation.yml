@@ -36,6 +36,15 @@ jobs:
             const yaml = require('yaml');
             const { owner, repo } = context.repo;
             
+            const addPRComment = async (message) => {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: message
+              });
+            };
+            
             try {
               // Read the PR changes for actions.yml
               const baseFile = await github.rest.repos.getContent({
@@ -90,9 +99,12 @@ jobs:
               return JSON.stringify(newActions.map(a => a.name));
               
             } catch (error) {
-              core.setFailed(`Error processing actions.yml: ${error.message}`);
+              const errorMessage = `Error processing actions.yml: ${error.message}`;
+              // Add a comment to the PR explaining the error
+              await addPRComment(`❌ **Action Processing Error**\n\n${errorMessage}\n\nPlease fix the issues and update your pull request.`);
+              core.setFailed(errorMessage);
               core.setOutput('error', error.message);
-              return '[]';
+              throw error; // This will stop the workflow
             }
 
       - name: Validate changes
