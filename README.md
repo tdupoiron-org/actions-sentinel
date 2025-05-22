@@ -1,6 +1,6 @@
 # actions-sentinel
 
-[![Build](https://github.com/tdupoiron-org/actions-sentinel/actions/workflows/build.yml/badge.svg)](https://github.com/tdupoiron-org/actions-sentinel/actions/workflows/build.yml)
+[![Build](https://github.com/tdupoiron-org/actions-sentinel/actions/workflows/build.yml/badge.svg)](https://github.com/tdupoiron-org/actions-sentinel/actions/workflows/build.yml) [![CodeQL](https://github.com/tdupoiron-org/actions-sentinel/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/tdupoiron-org/actions-sentinel/actions/workflows/github-code-scanning/codeql)
 
 A security-focused tool for evaluating and managing GitHub Actions in a controlled, automated workflow using IssueOps and GitOps principles.
 
