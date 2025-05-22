@@ -59,19 +59,36 @@ jobs:
             
             try {
               // Read the PR changes for actions.yml
-              const baseFile = await github.rest.repos.getContent({
-                owner,
-                repo,
-                path: 'whitelist/actions.yml',
-                ref: context.sha
-              });
+              const baseRef = context.payload.pull_request.base.sha;
+              const prRef = context.payload.pull_request.head.sha;
               
+              // Get base file content
+              let baseContent;
+              try {
+                const baseFile = await github.rest.repos.getContent({
+                  owner,
+                  repo,
+                  path: 'whitelist/actions.yml',
+                  ref: baseRef
+                });
+                baseContent = Buffer.from(baseFile.data.content, 'base64').toString();
+              } catch (error) {
+                if (error.status === 404) {
+                  // If file doesn't exist in base, use empty whitelist
+                  baseContent = yaml.stringify({ allowedActions: [] });
+                } else {
+                  throw error;
+                }
+              }
+              
+              // Get PR file content
               const prFile = await github.rest.repos.getContent({
                 owner,
                 repo,
                 path: 'whitelist/actions.yml',
-                ref: context.sha
+                ref: prRef
               });
+              const prContent = Buffer.from(prFile.data.content, 'base64').toString();
               
               // Parse and normalize the YAML content
               const parseAndNormalizeContent = (content) => {
@@ -100,15 +117,15 @@ jobs:
                 }
               };
 
-              const baseContent = parseAndNormalizeContent(Buffer.from(baseFile.data.content, 'base64').toString());
-              const prContent = parseAndNormalizeContent(Buffer.from(prFile.data.content, 'base64').toString());
+              const parsedBaseContent = parseAndNormalizeContent(baseContent);
+              const parsedPrContent = parseAndNormalizeContent(prContent);
 
               // Find new and removed actions
-              const baseActions = new Set(baseContent.allowedActions.map(a => a.name));
-              const prActions = new Set(prContent.allowedActions.map(a => a.name));
+              const baseActions = new Set(parsedBaseContent.allowedActions.map(a => a.name));
+              const prActions = new Set(parsedPrContent.allowedActions.map(a => a.name));
               
-              const newActions = prContent.allowedActions.filter(a => !baseActions.has(a.name));
-              const removedActions = baseContent.allowedActions.filter(a => !prActions.has(a.name));
+              const newActions = parsedPrContent.allowedActions.filter(a => !baseActions.has(a.name));
+              const removedActions = parsedBaseContent.allowedActions.filter(a => !prActions.has(a.name));
               
               // Add a summary comment
               const changesSummary = [];
