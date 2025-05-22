@@ -50,7 +50,7 @@ jobs:
       - name: Commit dist
         run: |
           git config --local user.email "${{ steps.get-user-id.outputs.user-id }}+${{ steps.generate-token.outputs.app-slug }}[bot]@users.noreply.github.com"
-          git config --local user.name "${{ steps.generate-token.outputs.app-slug }}[bot]"
+          git config --local user.name "sentinel"
           git add action/dist
           git commit -m "chore: update dist" || echo "No changes to commit"
           git push
