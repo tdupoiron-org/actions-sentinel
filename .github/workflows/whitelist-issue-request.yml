@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   process-whitelist-request:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: |
       contains(github.event.issue.labels.*.name, 'actions-whitelist-request') &&
       !endsWith(github.actor, '[bot]')

@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: write    # Required for checkout and pushing changes
       id-token: write   # Required for GitHub App token generation
