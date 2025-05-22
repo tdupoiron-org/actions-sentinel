@@ -1,5 +1,6 @@
 const { Octokit } = require('@octokit/rest');
 
+// This class is responsible for interacting with the GitHub API
 class GitHubAPI {
     constructor(token) {
         this.octokit = new Octokit({ auth: token });
