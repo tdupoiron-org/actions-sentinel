@@ -228,7 +228,7 @@ async function validateAction(actionRef) {
     }
 
     // Basic format validation
-    const actionPattern = /^[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_]+@[a-zA-Z0-9.-_]+$/;
+    const actionPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+@[a-zA-Z0-9._-]+$/;
     if (!actionPattern.test(actionRef)) {
         throw new Error('Invalid action reference format. Expected: owner/repo@ref');
     }
