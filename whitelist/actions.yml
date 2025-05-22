@@ -15,3 +15,19 @@ allowedActions:
     added: "2025-05-22"
     approvedBy: "system"
     securityReview: "pending"
+- name: test/test@v2
+  added: "2025-05-22"
+  approvedBy: "github-actions[bot]"
+  securityReview: "completed"
+- name: test/test@main
+  added: "2025-05-22"
+  approvedBy: "github-actions[bot]"
+  securityReview: "completed"
+- name: test/test@v2
+  added: "2025-05-22"
+  approvedBy: "github-actions[bot]"
+  securityReview: "completed"
+- name: test/test@v3
+  added: "2025-05-22"
+  approvedBy: "github-actions[bot]"
+  securityReview: "completed"
