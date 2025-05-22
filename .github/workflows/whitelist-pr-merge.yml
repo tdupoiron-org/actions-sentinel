@@ -27,12 +27,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ACTIONS_SENTINEL_APP_ID }}
+          private-key: ${{ secrets.ACTIONS_SENTINEL_APP_KEY }}
+
       - name: Integrate whitelist changes
         run: npm run integrate-whitelist
 
       - name: Update action restrictions
         uses: actions/github-script@v7
         with:
+          github-token: ${{ steps.generate-token.outputs.token }}
           script: |
             const yaml = require('yaml');
             const fs = require('fs');
