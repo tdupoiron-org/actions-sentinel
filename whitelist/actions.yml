@@ -11,3 +11,4 @@ allowedActions:
   - name: tom/dup@2
   - name: steph/dup@main
   - name: ert/ert@3
+  - name: rene/dup@main
