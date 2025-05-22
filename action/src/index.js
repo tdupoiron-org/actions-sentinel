@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const { validateAction } = require('./validators/action');
 const { GitHubAPI } = require('./github/api');
+const { Octokit } = require('@octokit/rest');
 
 async function validateActionReference(actionRef) {
     // Validate format: owner/repo@version

@@ -39,6 +39,7 @@ module.exports = {
 const core = __nccwpck_require__(6618);
 const { validateAction } = __nccwpck_require__(2003);
 const { GitHubAPI } = __nccwpck_require__(4445);
+const { Octokit } = __nccwpck_require__(7654);
 
 async function validateActionReference(actionRef) {
     // Validate format: owner/repo@version
