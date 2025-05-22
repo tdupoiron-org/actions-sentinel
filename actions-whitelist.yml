@@ -1,5 +1,5 @@
 allowedActions:
-  - name: actions/checkout@v4
-  - name: actions/github-script@v7
-  - name: actions/setup-node@v4
+  - actions/checkout@v4
+  - actions/github-script@v7
+  - actions/setup-node@v4
   - test/test@main
