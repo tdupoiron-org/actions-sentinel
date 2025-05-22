@@ -96,17 +96,17 @@ jobs:
         if: always()
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          result-encoding: string
           script: |
             try {
               const actionRef = '${{ steps.extract.outputs.result }}';
               const evaluationStatus = '${{ steps.evaluate.outputs.status }}';
-              const evaluationDetails = '${{ steps.evaluate.outputs.details }}';
+              const evaluationDetails = `${{ steps.evaluate.outputs.details }}`.replace(/'/g, "\\'").replace(/\r?\n/g, '\\n');
               
               let evaluationResultObj;
               try {
-                evaluationResultObj = JSON.parse('${{ steps.evaluate.outputs.result }}');
+                evaluationResultObj = JSON.parse('${{ steps.evaluate.outputs.result }}'.replace(/'/g, '"'));
               } catch (e) {
+                console.error('Error parsing evaluation results:', e);
                 evaluationResultObj = { error: 'Could not parse evaluation results' };
               }
               
@@ -125,10 +125,7 @@ jobs:
                 icon = '❓';
               }
 
-              const resultDetails = evaluationDetails || 'No additional details available';
-              
-              const checkmark = '✓';
-              const bullet = '•';
+              const resultDetails = evaluationDetails ? evaluationDetails.replace(/\\n/g, '\n') : 'No additional details available';
               
               const commentBody = [
                 `## Action Whitelist Evaluation ${icon}`,
@@ -142,7 +139,9 @@ jobs:
                 JSON.stringify(evaluationResultObj, null, 2),
                 '```',
                 '',
+                '```',
                 resultDetails,
+                '```',
                 '',
                 evaluationStatus === 'success' 
                   ? '_This issue will be closed as the evaluation was successful._'
