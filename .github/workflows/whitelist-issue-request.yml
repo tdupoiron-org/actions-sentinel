@@ -192,25 +192,15 @@ jobs:
           # Create whitelist dir if it doesn't exist
           mkdir -p whitelist
           
-          # Format current date in YYYY-MM-DD format
-          CURRENT_DATE=$(date +%Y-%m-%d)
-          
           echo "Processing whitelist update for action: ${{ steps.extract.outputs.result }}"
-          
-          # Add the new action to the whitelist with metadata
-          echo "- name: ${{ steps.extract.outputs.result }}" > temp_entry.yml
-          echo "  added: \"${CURRENT_DATE}\"" >> temp_entry.yml
-          echo "  approvedBy: \"github-actions[bot]\"" >> temp_entry.yml
-          echo "  securityReview: \"completed\"" >> temp_entry.yml
           
           # If the file is empty or doesn't exist, create it with the header
           if [ ! -f "whitelist/actions.yml" ] || [ ! -s "whitelist/actions.yml" ]; then
             echo "allowedActions:" > whitelist/actions.yml
           fi
           
-          # Append the new entry
-          cat temp_entry.yml >> whitelist/actions.yml
-          rm temp_entry.yml
+          # Append the new action entry
+          echo "  - name: ${{ steps.extract.outputs.result }}" >> whitelist/actions.yml
 
       - name: Commit and Push Changes
         if: success() && steps.evaluate.outputs.status == 'success'

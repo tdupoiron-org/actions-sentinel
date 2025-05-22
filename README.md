@@ -22,15 +22,12 @@ Create an issue using the "GitHub Actions Whitelist Request" template:
 
 ### 2. Git Flow (GitOps)
 
-Submit a pull request that modifies `actions-whitelist.yml`:
+Submit a pull request that modifies `actions.yml`:
 1. Fork the repository
-2. Add your action to the whitelist following the existing format:
+2. Add your action to the whitelist following the simple format:
    ```yaml
    allowedActions:
-     - name: owner/repo@version  # Required
-       added: "YYYY-MM-DD"       # Optional: date when the action was added
-       approvedBy: "username"    # Optional: who approved the action
-       securityReview: "pending" # Optional: completed, pending, or not-required
+     - name: owner/repo@version
    ```
 3. Submit a pull request for review
 4. The system will evaluate the action during the PR review process
@@ -39,17 +36,14 @@ Both methods ensure proper security review and maintain a clear audit trail of a
 
 ### actions.yml Structure
 
-The `whitelist/actions.yml` file must follow this structure:
+The `whitelist/actions.yml` file uses a simple structure:
 
 ```yaml
 allowedActions:
-  - name: owner/repo@version     # Required: Full action reference
-    added: "YYYY-MM-DD"         # Required: Date added in ISO format
-    approvedBy: "username"      # Required: Who approved the action
-    securityReview: "status"    # Required: "completed" or "pending"
+  - name: owner/repo@version     # Required: Full action reference in owner/repo@version format
 ```
 
-Each action entry must be properly indented under the `allowedActions` array and include all required fields. The system validates:
+Each action entry must be properly indented under the `allowedActions` array. The system validates:
 
 - YAML syntax and structure
 - Proper indentation (spaces required, not tabs)

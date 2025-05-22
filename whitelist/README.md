@@ -9,12 +9,14 @@ This directory contains the organization's GitHub Actions whitelist configuratio
 
 ## Whitelist Format
 
-Actions are defined in `actions.yml` with the following format:
+Actions are defined in `actions.yml` using a simple format that only requires the action name:
 
 ```yaml
 allowedActions:
   - name: actions/checkout@v4
-    added: "2024-01-15"
-    approvedBy: "username"
-    securityReview: "completed"
 ```
+
+Each entry must be in the format `owner/repo@ref` where:
+- `owner`: Repository owner (can include letters, numbers, hyphens, and underscores)
+- `repo`: Repository name (can include letters, numbers, hyphens, and underscores)
+- `ref`: Version reference (can include letters, numbers, dots, hyphens, and underscores)

@@ -10,20 +10,9 @@
                     "name": {
                         "type": "string",
                         "pattern": "^[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+@[a-zA-Z0-9.-_]+$"
-                    },
-                    "added": {
-                        "type": "string",
-                        "format": "date"
-                    },
-                    "approvedBy": {
-                        "type": "string"
-                    },
-                    "securityReview": {
-                        "type": "string",
-                        "enum": ["pending", "completed", "not-required"]
                     }
                 },
-                "required": ["name", "added", "approvedBy", "securityReview"]
+                "required": ["name"]
             }
         }
     },
