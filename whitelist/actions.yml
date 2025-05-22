@@ -38,3 +38,4 @@ allowedActions:
   approvedBy: "github-actions[bot]"
   securityReview: "completed"
   - name: a/a@main
+  - name: a/a@v1
