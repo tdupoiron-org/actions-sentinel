@@ -147,10 +147,19 @@ jobs:
               const failedStep = currentJob?.steps?.find(step => step.conclusion === 'failure');
               
               let errorMessage = '❌ Security validation failed.';
+              
+              // Find the specific output from the failed step
+              const getStepOutput = (step) => {
+                if (!step?.outputs) return '';
+                // For steps using github-script, the output is in the 'error' output
+                return step.outputs.error || step.outputs.stdout || '';
+              };
+
               if (failedStep?.name === 'Get changed actions') {
+                const stepOutput = getStepOutput(failedStep);
                 errorMessage += '\n\n### YAML Validation Error\n' + 
                               'There was an error processing your actions.yml file:\n' +
-                              '```\n' + failedStep.output || error + '\n```\n\n' +
+                              '```\n' + stepOutput + '\n```\n\n' +
                               'Please check:\n' +
                               '- Your YAML syntax is correct\n' +
                               '- All entries are properly indented with spaces (not tabs)\n' +
