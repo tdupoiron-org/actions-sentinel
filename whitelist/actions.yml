@@ -15,3 +15,7 @@ allowedActions:
     added: "2025-05-22"
     approvedBy: "system"
     securityReview: "pending"
+- name: test/test@v2
+  added: "2025-05-22"
+  approvedBy: "github-actions[bot]"
+  securityReview: "completed"
