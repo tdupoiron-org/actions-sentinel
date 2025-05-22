@@ -21,10 +21,21 @@ jobs:
           cache-dependency-path: action/package-lock.json
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          cd action && npm ci
       
       - name: Build
+        working-directory: ./action
         run: npm run build
+      
+      - name: Validate Build
+        working-directory: ./action
+        run: |
+          if [ ! -f "dist/index.js" ]; then
+            echo "Error: Build output not found"
+            exit 1
+          fi
       
       - name: Commit dist
         run: |
