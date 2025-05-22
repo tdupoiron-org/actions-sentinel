@@ -3,3 +3,4 @@ allowedActions:
   - name: actions/checkout@v3
   - name: oxsecurity/megalinter@v8.7.0
   - name: super-linter/super-linter@v7.4.0
+  - name: JamesIves/github-pages-deploy-action@v4.7.3
