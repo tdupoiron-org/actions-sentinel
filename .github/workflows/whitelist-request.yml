@@ -7,7 +7,7 @@ on:
 permissions:
   issues: write     # Needed for commenting and updating issues
   actions: write    # Needed for managing GitHub Actions settings
-  contents: read    # Needed for checking out code
+  contents: write   # Needed for pushing changes to the repository
 
 jobs:
   process-whitelist-request:
@@ -163,6 +163,42 @@ jobs:
               console.error('Failed to add evaluation results comment:', error);
               throw error;
             }
+
+      - name: Update Whitelist File
+        if: success() && steps.evaluate.outputs.status == 'success'
+        run: |
+          # Read the current whitelist content
+          if [ -f "actions-whitelist.yml" ]; then
+            echo "Updating existing whitelist file"
+          else
+            echo "Creating new whitelist file"
+            echo "allowedActions:" > actions-whitelist.yml
+          fi
+          
+          # Add the new action to the whitelist
+          echo "  - ${{ steps.extract.outputs.result }}" >> actions-whitelist.yml
+          
+          # Sort the file to keep it organized (excluding the first line)
+          sed '1d' actions-whitelist.yml | sort -u > temp_actions.yml
+          echo "allowedActions:" > actions-whitelist.yml
+          cat temp_actions.yml >> actions-whitelist.yml
+          rm temp_actions.yml
+
+      - name: Commit and Push Changes
+        if: success() && steps.evaluate.outputs.status == 'success'
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          
+          # Check if there are changes to commit
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add actions-whitelist.yml
+            git commit -m "chore: Update actions whitelist with ${{ steps.extract.outputs.result }}"
+            git push
+            echo "Successfully pushed whitelist changes"
+          else
+            echo "No changes to commit"
+          fi
 
       - name: Close Issue if Successful
         uses: actions/github-script@v7

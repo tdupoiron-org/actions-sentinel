@@ -8,6 +8,36 @@ A security-focused tool for evaluating and managing GitHub Actions in a controll
 
 This repository provides a secure way to manage which GitHub Actions are allowed to be used within your organization. It implements a controlled process where actions must be approved before they can be used in workflows, helping to maintain security and prevent potential risks from untrusted actions.
 
+## Whitelist Management
+
+The system maintains a list of approved actions in the `actions-whitelist.yml` file at the root of the repository. You can update this list using two methods:
+
+### 1. Issue Flow (IssueOps)
+
+Create an issue using the "GitHub Actions Whitelist Request" template:
+1. Fill in the action reference (owner/repo@version)
+2. Provide justification for the action
+3. Confirm security acknowledgments
+4. The system will automatically evaluate and process your request
+
+### 2. Git Flow (GitOps)
+
+Submit a pull request that modifies `actions-whitelist.yml`:
+1. Fork the repository
+2. Add your action to the whitelist following the existing format:
+   ```yaml
+   whitelisted_actions:
+     - name: owner/repo@version
+       approved_at: "YYYY-MM-DD"
+       approved_by: "your-username"
+       justification: "Reason for adding this action"
+       security_review_status: "pending"
+   ```
+3. Submit a pull request for review
+4. The system will evaluate the action during the PR review process
+
+Both methods ensure proper security review and maintain a clear audit trail of approved actions.
+
 ## Features
 
 - **IssueOps-based Workflow**: Uses GitHub Issues for requesting action whitelisting
