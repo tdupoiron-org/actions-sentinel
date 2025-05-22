@@ -8,3 +8,4 @@ allowedActions:
   - name: lowlighter/metrics@v3.34
   - name: a/a@main
   - name: aze/aze@aze
+  - name: tom/dup@2
