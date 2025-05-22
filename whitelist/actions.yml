@@ -1,2 +1,3 @@
 allowedActions:
   - name: actions/checkout@v4
+  - name: securego/gosec@v2.22.4
