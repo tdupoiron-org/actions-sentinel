@@ -1,15 +1,2 @@
 allowedActions:
   - name: actions/checkout@v4
-  - name: actions/github-script@v7
-  - name: actions/setup-node@v4
-  - name: test/test@main
-  - name: test/test@v2
-  - name: test/test@v3
-  - name: lowlighter/metrics@v3.34
-  - name: a/a@main
-  - name: aze/aze@aze
-  - name: tom/dup@2
-  - name: steph/dup@main
-  - name: tom/dup@1
-  - name: tom/dup@2
-  - name: tom/dup@3
