@@ -58,6 +58,17 @@ If validation fails, you'll receive a detailed error message specifying:
 
 This helps quickly identify and fix any formatting or structural issues in your whitelist entries.
 
+## Whitelist Application
+
+When changes to the whitelist are merged through a pull request, the system automatically applies the new restrictions using our custom Actions Sentinel action. The action:
+
+1. Reads the whitelist from `whitelist/actions.yml`
+2. Validates the whitelist format and content
+3. Updates the organization's allowed actions settings
+4. Provides detailed output about the update process
+
+This automation ensures that only approved actions can be used in your organization's workflows, maintaining security and compliance.
+
 ## Features
 
 - **IssueOps-based Workflow**: Uses GitHub Issues for requesting action whitelisting
@@ -78,7 +89,9 @@ You can use this action in your workflows to evaluate GitHub Actions:
 - name: Evaluate Actions
   uses: ./sentinel
   with:
-    actions: 'owner/repo@version,another/action@version'  # Comma-separated list of actions
+    # The action expects a comma-separated list of actions in owner/repo@version format
+    # If you have a YAML file with actions, you need to parse it first
+    actions: 'owner/repo@version,another/action@version'
     organization: 'your-org-name'
     github-token: ${{ secrets.GITHUB_TOKEN }}  # Token needs admin:org permissions
 ```

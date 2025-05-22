@@ -38,10 +38,10 @@ jobs:
       - name: Install dependencies
         run: npm install yaml
 
-      - name: Update action restrictions
+      - name: Read and parse whitelist
+        id: whitelist
         uses: actions/github-script@v7
         with:
-          github-token: ${{ steps.generate-token.outputs.token }}
           script: |
             const yaml = require('yaml');
             const fs = require('fs');
@@ -50,14 +50,14 @@ jobs:
             const whitelistContent = fs.readFileSync('whitelist/actions.yml', 'utf8');
             const whitelist = yaml.parse(whitelistContent);
             
-            // Get allowed actions
-            const allowedActions = whitelist.allowedActions.map(action => action.name);
-            
-            // Update repository settings
-            await github.rest.actions.setAllowedActionsRepository({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              enabled: true,
-              allowed_actions: 'selected',
-              verified_allowed_actions: allowedActions
-            });
+            // Get allowed actions and join them with commas
+            const allowedActions = whitelist.allowedActions.map(action => action.name).join(',');
+            return allowedActions;
+          result-encoding: string
+
+      - name: Update action restrictions
+        uses: ./action
+        with:
+          actions: ${{ steps.whitelist.outputs.result }}
+          organization: ${{ github.repository_owner }}
+          github-token: ${{ steps.generate-token.outputs.token }}
