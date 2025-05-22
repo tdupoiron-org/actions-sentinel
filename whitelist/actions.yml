@@ -2,3 +2,4 @@ allowedActions:
   - name: actions/checkout@v5
   - name: actions/checkout@v4
   - name: actions/checkout@v3
+  - name: actions/test@v1
