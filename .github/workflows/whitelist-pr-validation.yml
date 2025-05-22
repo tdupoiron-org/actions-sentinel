@@ -121,38 +121,44 @@ jobs:
 
       - name: Validate changes
         id: validation
-        run: |
-          # Parse the JSON array from previous step
-          NEW_ACTIONS='${{ steps.changes.outputs.result }}'
-          
-          if [ "$NEW_ACTIONS" = "[]" ]; then
-            echo "No new actions to validate"
-            echo "validation_status=success" >> $GITHUB_ENV
-            exit 0
-          fi
-          
-          # Parse the JSON array and validate each action
-          echo "$NEW_ACTIONS" | jq -r '.[]' | while read -r action; do
-            echo "Validating action: $action"
-            if ! npm run validate-action -- "$action"; then
-              echo "::error::Validation failed for action: $action"
-              echo "validation_status=failure" >> $GITHUB_ENV
-              exit 1
-            fi
-          done
-          
-          echo "validation_status=success" >> $GITHUB_ENV
-
-      - name: Update PR status
-        if: always()
         uses: actions/github-script@v7
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           script: |
-            const validation = process.env.validation_status;
-            const error = process.env.validation_error || '';
+            const NEW_ACTIONS = JSON.parse('${{ steps.changes.outputs.result }}');
             
-            if (validation === 'success') {
+            if (NEW_ACTIONS.length === 0) {
+              console.log('No new actions to validate');
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                body: '✅ No new actions to validate. This PR can be merged after security team review.',
+                event: 'COMMENT'
+              });
+              return;
+            }
+
+            let validationFailed = false;
+            let failedActions = [];
+            
+            // Validate each action
+            for (const action of NEW_ACTIONS) {
+              console.log(`Validating action: ${action}`);
+              
+              try {
+                // Run validation using npm script
+                const { execSync } = require('child_process');
+                execSync(`npm run validate-action -- "${action}"`, { stdio: 'inherit' });
+              } catch (error) {
+                validationFailed = true;
+                failedActions.push(action);
+                console.error(`::error::Validation failed for action: ${action}`);
+              }
+            }
+            
+            // Update PR based on validation results
+            if (!validationFailed) {
               await github.rest.pulls.createReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -161,42 +167,7 @@ jobs:
                 event: 'COMMENT'
               });
             } else {
-              // Get the error message from the steps output
-              const jobSteps = await github.rest.actions.listJobsForWorkflowRun({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: context.runId
-              });
-              
-              const currentJob = jobSteps.data.jobs.find(job => job.name === 'validate-whitelist-changes');
-              const failedStep = currentJob?.steps?.find(step => step.conclusion === 'failure');
-              
-              let errorMessage = '❌ Security validation failed.';
-              
-              // Find the specific output from the failed step
-              const getStepOutput = (step) => {
-                if (!step?.outputs) return '';
-                // For steps using github-script, the output is in the 'error' output
-                return step.outputs.error || step.outputs.stdout || '';
-              };
-
-              if (failedStep?.name === 'Get changed actions') {
-                const stepOutput = getStepOutput(failedStep);
-                errorMessage += '\n\n### YAML Validation Error\n' + 
-                              'There was an error processing your actions.yml file:\n' +
-                              '```\n' + stepOutput + '\n```\n\n' +
-                              'Please check:\n' +
-                              '- Your YAML syntax is correct\n' +
-                              '- All entries are properly indented with spaces (not tabs)\n' +
-                              '- All required fields are present\n' +
-                              '- The `allowedActions` key contains a valid array';
-              } else if (failedStep?.name === 'Validate changes') {
-                errorMessage += '\n\n### Action Validation Error\n' +
-                              'One or more actions failed security validation.\n' +
-                              'Please check the workflow logs for specific details about which validations failed.';
-              } else {
-                errorMessage += ' Please check the workflow logs for details.';
-              }
+              const errorMessage = `❌ Security validation failed.\n\n### Action Validation Error\n\nThe following actions failed security validation:\n${failedActions.map(a => `- \`${a}\``).join('\n')}\n\nPlease check the workflow logs for specific details about which validations failed.`;
               
               await github.rest.pulls.createReview({
                 owner: context.repo.owner,
@@ -205,4 +176,6 @@ jobs:
                 body: errorMessage,
                 event: 'REQUEST_CHANGES'
               });
+              
+              core.setFailed('Action validation failed');
             }
