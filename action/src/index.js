@@ -1,9 +1,6 @@
-const { Octokit } = require('@octokit/rest');
-const dotenv = require('dotenv');
 const core = require('@actions/core');
-
-// Load environment variables
-dotenv.config();
+const { validateAction } = require('./validators/action');
+const { GitHubAPI } = require('./github/api');
 
 async function validateActionReference(actionRef) {
     // Validate format: owner/repo@version

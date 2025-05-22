@@ -85,7 +85,7 @@ jobs:
 
       - name: Evaluate Action
         id: evaluate
-        uses: ./sentinel
+        uses: ./action
         with:
           action-name: ${{ steps.extract.outputs.result }}
           organization: ${{ github.repository_owner }}
@@ -166,22 +166,29 @@ jobs:
       - name: Update Whitelist File
         if: success() && steps.evaluate.outputs.status == 'success'
         run: |
-          # Read the current whitelist content
-          if [ -f "actions-whitelist.yml" ]; then
-            echo "Updating existing whitelist file"
-          else
-            echo "Creating new whitelist file"
-            echo "allowedActions:" > actions-whitelist.yml
+          # Create whitelist dir if it doesn't exist
+          mkdir -p whitelist
+          
+          # Format current date in YYYY-MM-DD format
+          CURRENT_DATE=$(date +%Y-%m-%d)
+          
+          echo "Processing whitelist update for action: ${{ steps.extract.outputs.result }}"
+          
+          # Add the new action to the whitelist with metadata
+          # Use yq to append new entry
+          echo "- name: ${{ steps.extract.outputs.result }}" > temp_entry.yml
+          echo "  added: \"${CURRENT_DATE}\"" >> temp_entry.yml
+          echo "  approvedBy: \"github-actions[bot]\"" >> temp_entry.yml
+          echo "  securityReview: \"completed\"" >> temp_entry.yml
+          
+          # If the file is empty or doesn't exist, create it with the header
+          if [ ! -f "whitelist/actions.yml" ] || [ ! -s "whitelist/actions.yml" ]; then
+            echo "allowedActions:" > whitelist/actions.yml
           fi
           
-          # Add the new action to the whitelist
-          echo "  - ${{ steps.extract.outputs.result }}" >> actions-whitelist.yml
-          
-          # Sort the file to keep it organized (excluding the first line)
-          sed '1d' actions-whitelist.yml | sort -u > temp_actions.yml
-          echo "allowedActions:" > actions-whitelist.yml
-          cat temp_actions.yml >> actions-whitelist.yml
-          rm temp_actions.yml
+          # Append the new entry
+          cat temp_entry.yml >> whitelist/actions.yml
+          rm temp_entry.yml
 
       - name: Commit and Push Changes
         if: success() && steps.evaluate.outputs.status == 'success'
@@ -191,8 +198,8 @@ jobs:
           
           # Check if there are changes to commit
           if [[ -n "$(git status --porcelain)" ]]; then
-            git add actions-whitelist.yml
-            git commit -m "chore: Update actions whitelist with ${{ steps.extract.outputs.result }}"
+            git add whitelist/actions.yml
+            git commit -m "chore: Add ${{ steps.extract.outputs.result }} to whitelist"
             git push
             echo "Successfully pushed whitelist changes"
           else

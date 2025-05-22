@@ -10,7 +10,7 @@ This repository provides a secure way to manage which GitHub Actions are allowed
 
 ## Whitelist Management
 
-The system maintains a list of approved actions in the `actions-whitelist.yml` file at the root of the repository. You can update this list using two methods:
+The system maintains a list of approved actions in the `whitelist/actions.yml` file. You can update this list using two methods:
 
 ### 1. Issue Flow (IssueOps)
 
@@ -26,12 +26,11 @@ Submit a pull request that modifies `actions-whitelist.yml`:
 1. Fork the repository
 2. Add your action to the whitelist following the existing format:
    ```yaml
-   whitelisted_actions:
-     - name: owner/repo@version
-       approved_at: "YYYY-MM-DD"
-       approved_by: "your-username"
-       justification: "Reason for adding this action"
-       security_review_status: "pending"
+   allowedActions:
+     - name: owner/repo@version  # Required
+       added: "YYYY-MM-DD"       # Optional: date when the action was added
+       approvedBy: "username"    # Optional: who approved the action
+       securityReview: "pending" # Optional: completed, pending, or not-required
    ```
 3. Submit a pull request for review
 4. The system will evaluate the action during the PR review process

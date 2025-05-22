@@ -1,4 +1,13 @@
 {
+  "name": "actions-sentinel-monorepo",
+  "private": true,
+  "workspaces": [
+    "action"
+  ],
+  "scripts": {
+    "build": "cd action && npm run build",
+    "test": "cd action && npm run test"
+  },
   "dependencies": {
     "yaml": "^2.8.0"
   }
