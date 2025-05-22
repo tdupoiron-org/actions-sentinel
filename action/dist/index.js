@@ -6,6 +6,7 @@
 
 const { Octokit } = __nccwpck_require__(7654);
 
+// This class is responsible for interacting with the GitHub API
 class GitHubAPI {
     constructor(token) {
         this.octokit = new Octokit({ auth: token });
