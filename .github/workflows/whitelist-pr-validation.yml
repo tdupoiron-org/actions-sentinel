@@ -71,7 +71,11 @@ jobs:
                   
                   return parsedContent;
                 } catch (parseError) {
-                  throw new Error(`YAML parsing error: ${parseError.message}`);
+                  // Make YAML parsing error more explicit about potential indentation issues
+                  const errorMessage = parseError.message.toLowerCase().includes('bad indentation')
+                    ? `YAML parsing error: Invalid indentation detected. Please check that all entries are properly indented with spaces, not tabs. Details: ${parseError.message}`
+                    : `YAML parsing error: ${parseError.message}. Please verify the YAML structure and indentation`;
+                  throw new Error(errorMessage);
                 }
               };
 
@@ -87,6 +91,7 @@ jobs:
               
             } catch (error) {
               core.setFailed(`Error processing actions.yml: ${error.message}`);
+              core.setOutput('error', error.message);
               return '[]';
             }
 
@@ -120,6 +125,7 @@ jobs:
         with:
           script: |
             const validation = process.env.validation_status;
+            const error = process.env.validation_error || '';
             
             if (validation === 'success') {
               await github.rest.pulls.createReview({
@@ -130,11 +136,38 @@ jobs:
                 event: 'COMMENT'
               });
             } else {
+              // Get the error message from the steps output
+              const jobSteps = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId
+              });
+              
+              const currentJob = jobSteps.data.jobs.find(job => job.name === 'validate-whitelist-changes');
+              const failedStep = currentJob?.steps?.find(step => step.conclusion === 'failure');
+              
+              let errorMessage = '❌ Security validation failed.';
+              if (failedStep?.name === 'Get changed actions') {
+                errorMessage += '\n\n### YAML Validation Error\n' + 
+                              'There was an error processing your actions.yml file:\n' +
+                              '```\n' + failedStep.output || error + '\n```\n\n' +
+                              'Please check:\n' +
+                              '- Your YAML syntax is correct\n' +
+                              '- All entries are properly indented with spaces (not tabs)\n' +
+                              '- All required fields are present\n' +
+                              '- The `allowedActions` key contains a valid array';
+              } else if (failedStep?.name === 'Validate changes') {
+                errorMessage += '\n\n### Action Validation Error\n' +
+                              'One or more actions failed security validation.\n' +
+                              'Please check the workflow logs for specific details about which validations failed.';
+              } else {
+                errorMessage += ' Please check the workflow logs for details.';
+              }
+              
               await github.rest.pulls.createReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: context.payload.pull_request.number,
-                body: '❌ Security validation failed. Please check the workflow logs for details.',
+                body: errorMessage,
                 event: 'REQUEST_CHANGES'
               });
-            }

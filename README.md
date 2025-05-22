@@ -49,7 +49,20 @@ allowedActions:
     securityReview: "status"    # Required: "completed" or "pending"
 ```
 
-Each action entry must be properly indented under the `allowedActions` array and include all required fields. Invalid YAML structure or missing fields will cause validation errors.
+Each action entry must be properly indented under the `allowedActions` array and include all required fields. The system validates:
+
+- YAML syntax and structure
+- Proper indentation (spaces required, not tabs)
+- Required fields presence
+- Array structure under `allowedActions`
+
+If validation fails, you'll receive a detailed error message specifying:
+- Whether there's an indentation problem (including guidance about using spaces instead of tabs)
+- Which required fields are missing
+- Any structural issues in the YAML
+- Specific line and position information where available
+
+This helps quickly identify and fix any formatting or structural issues in your whitelist entries.
 
 ## Features
 
