@@ -1,4 +1,4 @@
-name: Actions Whitelist Request Handler
+name: Actions Whitelist Issue Handler
 
 on:
   issues:
