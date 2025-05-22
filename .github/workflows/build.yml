@@ -17,8 +17,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '16'
-          cache: 'npm'
-          cache-dependency-path: action/package-lock.json
       
       - name: Install dependencies
         working-directory: ./action
