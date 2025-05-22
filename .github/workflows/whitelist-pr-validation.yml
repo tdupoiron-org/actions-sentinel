@@ -103,11 +103,28 @@ jobs:
               const baseContent = parseAndNormalizeContent(Buffer.from(baseFile.data.content, 'base64').toString());
               const prContent = parseAndNormalizeContent(Buffer.from(prFile.data.content, 'base64').toString());
 
-              // Find new or modified actions
+              // Find new and removed actions
               const baseActions = new Set(baseContent.allowedActions.map(a => a.name));
-              const newActions = prContent.allowedActions.filter(a => !baseActions.has(a.name));
+              const prActions = new Set(prContent.allowedActions.map(a => a.name));
               
-              // Return the stringified array directly
+              const newActions = prContent.allowedActions.filter(a => !baseActions.has(a.name));
+              const removedActions = baseContent.allowedActions.filter(a => !prActions.has(a.name));
+              
+              // Add a summary comment
+              const changesSummary = [];
+              if (newActions.length > 0) {
+                changesSummary.push('### Added Actions 🆕\n' + newActions.map(a => `- \`${a.name}\``).join('\n'));
+              }
+              if (removedActions.length > 0) {
+                changesSummary.push('### Removed Actions 🗑️\n' + removedActions.map(a => `- \`${a.name}\``).join('\n'));
+              }
+              if (changesSummary.length > 0) {
+                await addPRComment('## Actions Whitelist Changes Summary\n\n' + changesSummary.join('\n\n'));
+              } else {
+                await addPRComment('## Actions Whitelist Changes Summary\n\nNo actions were added or removed in this PR.');
+              }
+              
+              // Return only the new actions for validation
               return JSON.stringify(newActions.map(a => a.name));
               
             } catch (error) {
