@@ -7,3 +7,4 @@ allowedActions:
   - name: test/test@v3
   - name: lowlighter/metrics@v3.34
   - name: a/a@main
+  - name: aze/aze@aze
