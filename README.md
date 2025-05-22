@@ -127,6 +127,13 @@ Example workflow using outputs:
       console.log('Result:', JSON.stringify(result, null, 2));
 ```
 
+## Action Reference Format
+
+The action reference must follow this format: `owner/repo@ref` where:
+- `owner`: Repository owner, can contain letters, numbers, underscores, and hyphens
+- `repo`: Repository name, can contain letters, numbers, underscores, and hyphens
+- `ref`: Reference (tag/branch/commit), can contain letters, numbers, dots, underscores, and hyphens
+
 ### Web Interface
 
 To request a new GitHub Action to be whitelisted through the web interface:
