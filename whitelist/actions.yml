@@ -10,9 +10,6 @@ allowedActions:
   - name: aze/aze@aze
   - name: tom/dup@2
   - name: steph/dup@main
-  - name: ert/ert@3
-  - name: rene/dup@main
-  - name: securego/gosec@v2.22.4
-  - name: zeeshan/action@main
-  - name: zeeshan/action@main
-  - name: securego/gosec@v2.22.5
+  - name: tom/dup@1
+  - name: tom/dup@2
+  - name: tom/dup@3
