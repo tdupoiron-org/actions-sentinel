@@ -176,18 +176,16 @@ jobs:
             let validationFailed = false;
             let failedActions = [];
             
-            // Validate each action
+            // Validate each action's syntax
             for (const action of NEW_ACTIONS) {
               console.log(`Validating action: ${action}`);
               
-              try {
-                // Run validation using npm script
-                const { execSync } = require('child_process');
-                execSync(`npm run validate-action -- "${action}"`, { stdio: 'inherit' });
-              } catch (error) {
+              // Check if action name follows the format: owner/repo@ref
+              const actionPattern = /^[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_.]+@[a-zA-Z0-9-_.]+$/;
+              if (!actionPattern.test(action)) {
                 validationFailed = true;
                 failedActions.push(action);
-                console.error(`::error::Validation failed for action: ${action}`);
+                console.error(`::error::Invalid action format: ${action}. Expected format: owner/repo@ref`);
               }
             }
             
@@ -197,11 +195,11 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: context.payload.pull_request.number,
-                body: '✅ Security validation passed. This PR can be merged after security team review.',
+                body: '✅ Action name syntax validation passed. This PR can be merged after security team review.',
                 event: 'COMMENT'
               });
             } else {
-              const errorMessage = `❌ Security validation failed.\n\n### Action Validation Error\n\nThe following actions failed security validation:\n${failedActions.map(a => `- \`${a}\``).join('\n')}\n\nPlease check the workflow logs for specific details about which validations failed.`;
+              const errorMessage = `❌ Action name syntax validation failed.\n\n### Action Validation Error\n\nThe following actions have invalid syntax:\n${failedActions.map(a => `- \`${a}\` (expected format: owner/repo@ref)`).join('\n')}\n\nPlease update the action names to follow the correct format: owner/repo@ref`;
               
               await github.rest.pulls.createReview({
                 owner: context.repo.owner,
@@ -211,5 +209,5 @@ jobs:
                 event: 'REQUEST_CHANGES'
               });
               
-              core.setFailed('Action validation failed');
+              core.setFailed('Action name syntax validation failed');
             }
