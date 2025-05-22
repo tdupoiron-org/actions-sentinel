@@ -2,3 +2,4 @@ allowedActions:
   - name: actions/checkout@v5
   - name: actions/checkout@v3
   - name: oxsecurity/megalinter@v8.7.0
+  - name: super-linter/super-linter@v7.4.0
