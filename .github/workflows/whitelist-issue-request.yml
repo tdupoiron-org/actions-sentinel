@@ -13,7 +13,9 @@ permissions:
 jobs:
   process-whitelist-request:
     runs-on: self-hosted
-    if: contains(github.event.issue.labels.*.name, 'actions-whitelist-request')
+    if: |
+      contains(github.event.issue.labels.*.name, 'actions-whitelist-request') &&
+      !endsWith(github.actor, '[bot]')
     permissions:
       contents: write      # Needed for pushing changes
       issues: write       # Needed for updating issues
