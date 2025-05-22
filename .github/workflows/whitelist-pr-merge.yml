@@ -1,0 +1,54 @@
+name: Actions Whitelist PR Integration
+
+on:
+  pull_request:
+    paths:
+      - 'whitelist/actions.yml'
+    types: [closed]
+
+jobs:
+  integrate-whitelist:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Integrate whitelist changes
+        run: npm run integrate-whitelist
+
+      - name: Update action restrictions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const yaml = require('yaml');
+            const fs = require('fs');
+            
+            // Read the whitelist file
+            const whitelistContent = fs.readFileSync('whitelist/actions.yml', 'utf8');
+            const whitelist = yaml.parse(whitelistContent);
+            
+            // Get allowed actions
+            const allowedActions = whitelist.allowedActions.map(action => action.name);
+            
+            // Update repository settings
+            await github.rest.actions.setAllowedActionsRepository({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              enabled: true,
+              allowed_actions: 'selected',
+              verified_allowed_actions: allowedActions
+            });
