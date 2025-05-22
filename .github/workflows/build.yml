@@ -10,6 +10,9 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+    permissions:
+      contents: write    # Required for checkout and pushing changes
+      id-token: write   # Required for GitHub App token generation
     steps:
       - uses: actions/checkout@v4
       
