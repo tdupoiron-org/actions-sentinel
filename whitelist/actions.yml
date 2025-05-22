@@ -10,3 +10,4 @@ allowedActions:
   - name: aze/aze@aze
   - name: tom/dup@2
   - name: steph/dup@main
+  - name: ert/ert@3
