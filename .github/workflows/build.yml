@@ -14,7 +14,19 @@ jobs:
       contents: write    # Required for checkout and pushing changes
       id-token: write   # Required for GitHub App token generation
     steps:
-      - uses: actions/checkout@v4
+
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ACTIONS_SENTINEL_APP_ID }}
+          private-key: ${{ secrets.ACTIONS_SENTINEL_APP_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.generate-token.outputs.token }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,13 +48,6 @@ jobs:
             echo "Error: Build output not found"
             exit 1
           fi
-      
-      - name: Generate GitHub App Token
-        id: generate-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ vars.ACTIONS_SENTINEL_APP_ID }}
-          private-key: ${{ secrets.ACTIONS_SENTINEL_APP_KEY }}
 
       - name: Get GitHub App User ID
         id: get-user-id

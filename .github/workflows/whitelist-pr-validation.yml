@@ -14,8 +14,19 @@ jobs:
   validate-whitelist-changes:
     runs-on: ubuntu-latest
     steps:
+
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ACTIONS_SENTINEL_APP_ID }}
+          private-key: ${{ secrets.ACTIONS_SENTINEL_APP_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.generate-token.outputs.token }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,13 +36,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Generate GitHub App Token
-        id: generate-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ vars.ACTIONS_SENTINEL_APP_ID }}
-          private-key: ${{ secrets.ACTIONS_SENTINEL_APP_KEY }}
 
       - name: Get changed actions
         id: changes
