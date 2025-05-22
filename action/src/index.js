@@ -4,12 +4,10 @@ const { GitHubAPI } = require('./github/api');
 const { Octokit } = require('@octokit/rest');
 
 async function validateActionReference(actionRef) {
-    // Validate format: owner/repo@version
-    const pattern = /^[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+@[a-zA-Z0-9.\-_]+$/;
-    if (!pattern.test(actionRef)) {
-        throw new Error('Invalid action reference format. Expected: owner/repo@version');
-    }
+    // Use the imported validator first
+    await validateAction(actionRef);
 
+    // Then parse the components
     const [ownerRepo, version] = actionRef.split('@');
     const [owner, repo] = ownerRepo.split('/');
 
