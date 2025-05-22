@@ -30,46 +30,73 @@ jobs:
         id: changes
         uses: actions/github-script@v7
         with:
+          result-encoding: string
           script: |
             const fs = require('fs');
             const yaml = require('yaml');
+            const { owner, repo } = context.repo;
             
-            // Read the PR changes for actions.yml
-            const baseFile = await github.rest.repos.getContent({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'whitelist/actions.yml',
-              ref: context.payload.pull_request.base.sha
-            });
-            
-            const prFile = await github.rest.repos.getContent({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'whitelist/actions.yml',
-              ref: context.payload.pull_request.head.sha
-            });
-            
-            const baseContent = yaml.parse(Buffer.from(baseFile.data.content, 'base64').toString());
-            const prContent = yaml.parse(Buffer.from(prFile.data.content, 'base64').toString());
-            
-            // Find new or modified actions
-            const baseActions = new Set(baseContent.allowedActions.map(a => a.name));
-            const newActions = prContent.allowedActions.filter(a => !baseActions.has(a.name));
-            
-            return {
-              newActions: newActions.map(a => a.name)
-            };
+            try {
+              // Read the PR changes for actions.yml
+              const baseFile = await github.rest.repos.getContent({
+                owner,
+                repo,
+                path: 'whitelist/actions.yml',
+                ref: context.payload.pull_request.base.sha
+              });
+              
+              const prFile = await github.rest.repos.getContent({
+                owner,
+                repo,
+                path: 'whitelist/actions.yml',
+                ref: context.payload.pull_request.head.sha
+              });
+              
+              const baseContent = yaml.parse(Buffer.from(baseFile.data.content, 'base64').toString());
+              const prContent = yaml.parse(Buffer.from(prFile.data.content, 'base64').toString());
+              
+              if (!baseContent.allowedActions || !prContent.allowedActions) {
+                throw new Error('Invalid actions.yml format: allowedActions is required');
+              }
+
+              // Find new or modified actions
+              const baseActions = new Set(baseContent.allowedActions.map(a => a.name));
+              const newActions = prContent.allowedActions.filter(a => !baseActions.has(a.name));
+              
+              // Return the stringified array directly
+              return JSON.stringify(newActions.map(a => a.name));
+              
+            } catch (error) {
+              core.setFailed(`Error processing actions.yml: ${error.message}`);
+              return '[]';
+            }
 
       - name: Validate changes
         id: validation
         run: |
-          # Run security validation for each new action
-          for action in ${{ steps.changes.outputs.newActions }}; do
+          # Parse the JSON array from previous step
+          NEW_ACTIONS='${{ steps.changes.outputs.result }}'
+          
+          if [ "$NEW_ACTIONS" = "[]" ]; then
+            echo "No new actions to validate"
+            echo "validation_status=success" >> $GITHUB_ENV
+            exit 0
+          fi
+          
+          # Parse the JSON array and validate each action
+          echo "$NEW_ACTIONS" | jq -r '.[]' | while read -r action; do
             echo "Validating action: $action"
-            npm run validate-action -- "$action"
+            if ! npm run validate-action -- "$action"; then
+              echo "::error::Validation failed for action: $action"
+              echo "validation_status=failure" >> $GITHUB_ENV
+              exit 1
+            fi
           done
+          
+          echo "validation_status=success" >> $GITHUB_ENV
 
       - name: Update PR status
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
