@@ -14,3 +14,4 @@ allowedActions:
   - name: rene/dup@main
   - name: securego/gosec@v2.22.4
   - name: zeeshan/action@main
+- name: securego/gosec@v2.22.5
