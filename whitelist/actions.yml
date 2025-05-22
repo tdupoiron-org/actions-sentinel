@@ -31,10 +31,11 @@ allowedActions:
     added: "2025-05-22"
     approvedBy: "github-actions[bot]"
     securityReview: "pending"
-  approvedBy: "github-actions[bot]"
-  securityReview: "completed"
-- name: lowlighter/metrics@v3.34
-  added: "2025-05-22"
-  approvedBy: "github-actions[bot]"
-  securityReview: "completed"
+    approvedBy: "github-actions[bot]"
+    securityReview: "completed"
+  - name: lowlighter/metrics@v3.34
+    added: "2025-05-22"
+    approvedBy: "github-actions[bot]"
+    securityReview: "completed"
   - name: a/a@main
+  - name: a/a@a
