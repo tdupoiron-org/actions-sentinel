@@ -35,6 +35,9 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Install dependencies
+        run: npm install yaml
+
       - name: Update action restrictions
         uses: actions/github-script@v7
         with:
