@@ -3,3 +3,4 @@ allowedActions:
   - name: super-linter/super-linter@v7.4.0
   - name: JamesIves/github-pages-deploy-action@v4.7.3
   - name: azure/login@v1
+  - name: azure/login@v1
