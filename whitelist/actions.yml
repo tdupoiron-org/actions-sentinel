@@ -4,3 +4,4 @@ allowedActions:
   - name: JamesIves/github-pages-deploy-action@v4.7.3
   - name: azure/login@v1
   - name: azure/login@v1
+  - name: di-sukharev/opencommit@github-action-v1.0.2
