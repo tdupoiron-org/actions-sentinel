@@ -6,3 +6,4 @@ allowedActions:
   - name: azure/container-apps-deploy-action@v1
   - name: docker/login-action@v3
   - name: docker/build-push-action@v5
+  - name: hashicorp/setup-terraform@v3
