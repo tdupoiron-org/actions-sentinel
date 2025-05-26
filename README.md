@@ -112,3 +112,50 @@ permissions:
 The action requires a GitHub token with `admin:org` permissions to manage organization settings. If the default `GITHUB_TOKEN` doesn't have sufficient permissions, you'll need to create and use a Personal Access Token (PAT) with the required permissions:
 
 ```yaml
+    organization: 'your-org-name'
+    github-token: ${{ secrets.GITHUB_TOKEN }}  # Token needs admin:org permissions
+```
+
+> **Note**: The GitHub token provided must have `admin:org` permissions to manage organization settings. The default `GITHUB_TOKEN` may not have sufficient permissions - you might need to use a Personal Access Token (PAT) with the required permissions.
+
+## GitHub App Setup
+
+To use this action with a GitHub App (recommended approach), follow these steps:
+
+1. Create a new GitHub App:
+   - Go to your organization's settings
+   - Navigate to Developer settings > GitHub Apps
+   - Click "New GitHub App"
+   - Fill in the required information:
+     - GitHub App name: (e.g., "Actions Sentinel")
+     - Homepage URL: (your repository URL)
+     - Webhook: Disable (not required)
+
+2. Set Repository Permissions:
+   - Issues (Read and write)
+   - Pull requests (Read and write)
+   - Metadata (Read-only)
+   - Contents (Read and write)
+
+3. Set Organization Permissions:
+   - Organization administration (Read and write)
+
+4. Install the App:
+   - After creating the app, install it in your organization
+   - Select the repositories where you want to use it
+   - You can select "All repositories" or choose specific ones
+
+5. Generate a Private Key:
+   - After creating the app, generate and download a private key
+   - Store this key securely in your repository secrets (see after)
+
+6. Configure Repository Secrets:
+   Add the following secrets to your repository:
+   - `ACTIONS_SENTINEL_APP_ID`: Your GitHub App's ID
+   - `ACTIONS_SENTINEL_APP_KEY`: The private key
+
+These permissions allow the GitHub App to:
+- Read and manage GitHub Actions settings at org level
+- Create and update issues for action requests
+- Process pull requests for whitelist changes
+- Manage repository contents
