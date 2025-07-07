@@ -7,3 +7,4 @@ allowedActions:
   - name: docker/login-action@v3
   - name: docker/build-push-action@v5
   - name: hashicorp/setup-terraform@v3
+  - name: shivammathur/setup-php@v2
