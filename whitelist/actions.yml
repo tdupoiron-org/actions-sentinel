@@ -8,3 +8,4 @@ allowedActions:
   - name: docker/build-push-action@v5
   - name: hashicorp/setup-terraform@v3
   - name: shivammathur/setup-php@v2
+  - name: trufflesecurity/trufflehog@v3.89.2
