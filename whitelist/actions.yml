@@ -10,3 +10,4 @@ allowedActions:
   - name: shivammathur/setup-php@v2
   - name: trufflesecurity/trufflehog@v3.89.2
   - name: trufflesecurity/trufflehog@v3.89.2
+  - name: appleboy/ssh-action@v1.2.2
