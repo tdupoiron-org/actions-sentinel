@@ -504,3 +504,217 @@ The configured authentication allows Actions Sentinel to:
 - ✅ Process pull requests for whitelist changes (GitOps)
 - ✅ Read and modify repository contents (whitelist files)
 - ✅ Validate and apply organization action policies
+
+## Features
+
+- 🔒 **Security-First Approach**: Only approved actions can be used in organization workflows
+- 📋 **IssueOps Workflow**: Request action approvals through structured GitHub issues
+- 🔄 **GitOps Implementation**: Manage whitelist through version-controlled configuration
+- 🤖 **Automated Evaluation**: Built-in security scanning and policy validation
+- 📝 **Standardized Process**: Structured templates for consistent request submission  
+- 🔔 **Smart Notifications**: Rich, context-aware status updates and feedback
+- 🛡️ **Robust Error Handling**: Comprehensive validation and clear error reporting
+- 📊 **Audit Trail**: Complete history of approved actions and decisions
+- 🎯 **Organization-Wide Control**: Centralized management of allowed GitHub Actions
+- ⚡ **Real-Time Application**: Automatic synchronization with GitHub organization settings
+
+## Examples
+
+### Example 1: Basic Workflow Integration
+
+```yaml
+name: Manage Actions Whitelist
+on:
+  push:
+    paths: ['whitelist/actions.yml']
+    branches: [main]
+  pull_request:
+    paths: ['whitelist/actions.yml']
+
+jobs:
+  validate-whitelist:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Actions
+        uses: ./
+        with:
+          actions: 'actions/checkout@v4,actions/setup-node@v3'
+          organization: ${{ github.repository_owner }}
+          github-token: ${{ secrets.ACTIONS_SENTINEL_TOKEN }}
+
+  apply-whitelist:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply Whitelist
+        uses: ./
+        with:
+          actions: 'actions/checkout@v4,docker/build-push-action@v6.17.0'
+          organization: ${{ github.repository_owner }}
+          github-token: ${{ secrets.ACTIONS_SENTINEL_TOKEN }}
+```
+
+### Example 2: IssueOps Request
+
+When creating an issue for action approval, use this format:
+
+**Action Reference**: `docker/build-push-action@v6.17.0`
+
+**Justification**: 
+```
+We need this action to build and push Docker images for our microservices deployment pipeline.
+
+Security considerations reviewed:
+- Action is from official Docker organization
+- Version v6.17.0 is a stable release with known security fixes
+- Action will be used in controlled CI/CD environment
+- Minimal permissions required (only Docker registry access)
+```
+
+### Example 3: GitOps Whitelist Update
+
+```yaml
+# whitelist/actions.yml
+allowedActions:
+  # Core GitHub Actions
+  - name: actions/checkout@v4
+  - name: actions/setup-node@v4
+  - name: actions/setup-python@v5
+  
+  # Docker Actions  
+  - name: docker/login-action@v3
+  - name: docker/build-push-action@v6.17.0
+  
+  # Security Tools
+  - name: trufflesecurity/trufflehog@v3.89.2
+  - name: oxsecurity/megalinter@v8.7.0
+  
+  # Deployment Actions
+  - name: azure/login@v1
+  - name: hashicorp/setup-terraform@v3
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. "Insufficient permissions" Error
+
+**Problem**: Action fails with permissions error
+```
+Error: Resource not accessible by integration
+```
+
+**Solution**: 
+- Ensure your GitHub App or PAT has `admin:org` permissions
+- Verify the app is installed on the correct organization
+- Check that repository secrets are correctly configured
+
+#### 2. YAML Validation Errors
+
+**Problem**: Whitelist validation fails
+```
+Error: Invalid YAML structure in actions.yml
+```
+
+**Solution**:
+- Use spaces (not tabs) for indentation
+- Ensure proper YAML array syntax:
+  ```yaml
+  allowedActions:
+    - name: action@version  # Correct
+  # - name action@version   # Incorrect (missing colon)
+  ```
+- Validate YAML syntax using online tools
+
+#### 3. Action Reference Format Issues
+
+**Problem**: Action not recognized
+```
+Error: Invalid action reference format
+```
+
+**Solution**: Ensure actions follow the format `owner/repo@ref`:
+- ✅ `actions/checkout@v4`
+- ✅ `docker/build-push-action@v6.17.0` 
+- ❌ `checkout@v4` (missing owner)
+- ❌ `actions/checkout` (missing version)
+
+#### 4. GitHub App Installation Issues
+
+**Problem**: App not found or not installed
+
+**Solution**:
+1. Verify the app is installed in your organization
+2. Check that the App ID in secrets matches your GitHub App
+3. Ensure the private key is correctly formatted (including BEGIN/END lines)
+
+### Getting Help
+
+If you continue to experience issues:
+
+1. **Check the Issues tab** for similar problems and solutions
+2. **Review workflow logs** for detailed error messages
+3. **Validate your configuration** against the examples in this README
+4. **Create a new issue** with:
+   - Detailed error message
+   - Your configuration (with secrets redacted)
+   - Steps to reproduce the problem
+
+## Contributing
+
+We welcome contributions to Actions Sentinel! Here's how you can help:
+
+### Ways to Contribute
+
+- 🐛 **Report bugs** or suggest improvements via GitHub Issues
+- 📝 **Improve documentation** with clearer examples or explanations  
+- 🔧 **Submit bug fixes** or feature enhancements via Pull Requests
+- 🧪 **Add tests** to improve code coverage and reliability
+- 💡 **Share use cases** and integration examples
+
+### Development Setup
+
+1. **Fork the repository** and clone your fork locally
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+3. **Make your changes** in a feature branch
+4. **Test your changes**:
+   ```bash
+   npm run build
+   npm run test  # Once tests are available
+   ```
+5. **Submit a pull request** with a clear description of your changes
+
+### Contribution Guidelines
+
+- Follow existing code style and conventions
+- Add tests for new functionality when possible
+- Update documentation for any new features
+- Use clear, descriptive commit messages
+- Ensure your PR passes all status checks
+
+## License
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+
+### Summary
+
+The Apache 2.0 license allows you to:
+- ✅ Use the code commercially
+- ✅ Modify and distribute the code
+- ✅ Use the code privately
+- ✅ Include the code in proprietary software
+
+With the requirement to:
+- 📄 Include the original license and copyright notice
+- 📝 Document any significant changes made
+
+---
+
+**Questions or need help?** Feel free to [open an issue](../../issues/new) or check our [existing discussions](../../discussions).
