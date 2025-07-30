@@ -75,7 +75,7 @@ This automation ensures that only approved actions can be used in your organizat
 - **Automated Security Evaluation**: Reviews GitHub Actions for security concerns before approval
 - **GitOps Implementation**: Maintains whitelist through version-controlled configuration
 - **Standardized Request Process**: Structured issue templates for action whitelisting requests
-- **CLI Interface**: Programmatic interface to manage action whitelisting
+- **GitHub Action Interface**: Programmatic interface to manage action whitelisting through workflows
 - **Smart Notifications**: Rich, context-aware status updates with dynamic feedback based on evaluation results
 - **Robust Error Handling**: Comprehensive error handling and status reporting throughout the process
 
@@ -87,7 +87,7 @@ You can use this action in your workflows to evaluate GitHub Actions:
 
 ```yaml
 - name: Evaluate Actions
-  uses: ./sentinel
+  uses: tdupoiron-org/actions-sentinel@main
   with:
     # The action expects a comma-separated list of actions in owner/repo@version format
     # If you have a YAML file with actions, you need to parse it first
@@ -107,13 +107,6 @@ permissions:
   issues: write     # If you need to update issues
   actions: write    # Required for managing GitHub Actions settings
   contents: read    # Required for checking out code
-```
-
-The action requires a GitHub token with `admin:org` permissions to manage organization settings. If the default `GITHUB_TOKEN` doesn't have sufficient permissions, you'll need to create and use a Personal Access Token (PAT) with the required permissions:
-
-```yaml
-    organization: 'your-org-name'
-    github-token: ${{ secrets.GITHUB_TOKEN }}  # Token needs admin:org permissions
 ```
 
 > **Note**: The GitHub token provided must have `admin:org` permissions to manage organization settings. The default `GITHUB_TOKEN` may not have sufficient permissions - you might need to use a Personal Access Token (PAT) with the required permissions.
