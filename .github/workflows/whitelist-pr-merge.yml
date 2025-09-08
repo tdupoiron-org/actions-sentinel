@@ -40,7 +40,7 @@ jobs:
 
       - name: Read and parse whitelist
         id: whitelist
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const yaml = require('yaml');

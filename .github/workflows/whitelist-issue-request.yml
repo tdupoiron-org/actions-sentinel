@@ -44,7 +44,7 @@ jobs:
 
       - name: Extract Action Reference
         id: extract
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           script: |
@@ -81,7 +81,7 @@ jobs:
           echo "Processing whitelist request for action: ${{ env.ACTION_REF }}"
           
       - name: Update Issue Title
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -127,7 +127,7 @@ jobs:
           github-token: ${{ steps.generate-token.outputs.token }}
 
       - name: Add Evaluation Results
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: always()
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
@@ -233,7 +233,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Close Issue if Successful
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: success() && steps.evaluate.outputs.status == 'success'
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
